@@ -297,6 +297,43 @@ read the comma-separated `-rgb` form, not the colour variable. Setting only
 a while is exactly what the main container did, on a differently-coloured page.
 Use the `rgb-channels()` helper.
 
+#### Bootstrap's component variables are stubborn
+
+Setting `--bs-primary` and `--bs-link-color` at `:root` does **not** restyle
+Bootstrap's components. Each one declares its own scoped layer, and many entries
+in that layer are literal colours rather than references — `.dropdown-menu` ships
+`--bs-dropdown-link-active-bg: #0d6efd`, so the selected menu item stays
+Bootstrap blue no matter what the palette says.
+
+Every component the theme renders therefore gets its own override block in
+`assets/styles.scss`: `.navbar`, `.dropdown-menu`, `.btn-outline-secondary`, plus
+the globals other components reach for (`--bs-border-color-translucent` for card
+and dropdown borders, `--bs-focus-ring-color` for every focusable element,
+`--bs-secondary`, `--bs-tertiary-color`, `--bs-highlight-bg`).
+
+**If you add a Bootstrap component, check its variables.** Grep
+`assets/imports/bootstrap/bootstrap.min.css` for `--bs-<component>-` and look for
+literal hex values; anything that carries one needs an entry.
+
+Two specificity notes, both of which have bitten this file:
+
+- Theme values are published from `:root` and `:root[data-bs-theme="dark"]`, so
+  the dark block outranks Bootstrap's own `[data-bs-theme="dark"]` regardless of
+  stylesheet order. A bare `[data-bs-theme="dark"]` selector ties on specificity
+  and then depends on load order.
+- Bootstrap's `.navbar-dark, .navbar[data-bs-theme=dark]` would outrank a plain
+  `.navbar` override, but only matches when the attribute sits on the navbar
+  element itself. This theme sets it on `<html>`, so it never matches. Adding
+  `navbar-dark` to the markup would resurrect the stock colours.
+
+#### Highlighted states
+
+`--theme-accent-bg` / `--theme-accent-fg` are the filled "this one is selected"
+pair, used by the active dropdown item and by button hover. The foreground has to
+flip between modes: the light accent is a dark brown that carries white, while
+the dark accent is a light amber where white manages only 2.52:1, so it takes the
+page charcoal instead.
+
 Inline code uses the secondary hue on a faint chip. Bootstrap's default is
 `#d63384`, a pink from no palette here that manages only 4.50:1 on white. The
 dark variant is lightened toward white rather than toward `highlight`, which

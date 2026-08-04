@@ -281,6 +281,12 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --theme-gradient: linear-gradient(90deg, #{$gradient-start}, #{$gradient-end});
     --theme-code:           #{$light-code};
 
+    // A filled "this one is selected" pill: active dropdown item, button hover.
+    // The foreground has to flip between modes — the dark-mode accent is a light
+    // amber, and white on it is 2.52:1.
+    --theme-accent-bg:      #{$light-link};
+    --theme-accent-fg:      #{$white};
+
     // Hand the palette to Bootstrap so its own components stop using the
     // stock blues and greys.
     --bs-body-bg:          #{$light-bg};
@@ -304,6 +310,15 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --bs-tertiary-bg-rgb:  #{rgb-channels($light-callout-bg)};
     --bs-emphasis-color-rgb: #{rgb-channels(neutral(12%))};
     --bs-primary-rgb:      #{rgb-channels($c-primary)};
+
+    // Globals that other Bootstrap components reach for, each of which ships a
+    // literal colour: card and dropdown borders, the focus ring on every
+    // focusable element, <mark>, and the .text-secondary utilities.
+    --bs-border-color-translucent: #{$light-border};
+    --bs-focus-ring-color: rgba(#{rgb-channels($c-primary)}, 0.35);
+    --bs-secondary:        #{$light-muted};
+    --bs-tertiary-color:   #{$light-muted};
+    --bs-highlight-bg:     #{$light-warning-bg};
 }
 
 // Scoped with `:root` so this always outranks Bootstrap's own
@@ -323,6 +338,8 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --theme-warning-bg:     #{$dark-warning-bg};
     --theme-warning-accent: #{$dark-warning-accent};
     --theme-code:           #{$dark-code};
+    --theme-accent-bg:      #{$dark-link};
+    --theme-accent-fg:      #{$dark-bg};   // 6.15:1 on the amber
 
     --bs-body-bg:          #{$dark-bg};
     --bs-body-color:       #{$dark-ink};
@@ -341,6 +358,59 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --bs-secondary-bg-rgb: #{rgb-channels($dark-surface)};
     --bs-tertiary-bg-rgb:  #{rgb-channels($dark-callout-bg)};
     --bs-emphasis-color-rgb: #{rgb-channels(neutral(96%))};
+
+    --bs-border-color-translucent: #{$dark-border};
+    --bs-secondary:        #{$dark-muted};
+    --bs-tertiary-color:   #{$dark-muted};
+    --bs-highlight-bg:     #{$dark-warning-bg};
+}
+
+// ---------------------------------------------------------------------------
+// Bootstrap component variables
+// ---------------------------------------------------------------------------
+// Bootstrap scopes a second layer of variables to each component and gives many
+// of them literal values, so overriding --bs-primary or --bs-link-color never
+// reaches them. The active dropdown item, for one, is a hardcoded #0d6efd. Any
+// component the theme renders needs its own layer pointed at the palette.
+
+.navbar {
+    --bs-navbar-color:                  var(--theme-ink);
+    --bs-navbar-hover-color:            var(--theme-link);
+    --bs-navbar-active-color:           var(--theme-link);
+    --bs-navbar-brand-color:            var(--theme-ink);
+    --bs-navbar-brand-hover-color:      var(--theme-link);
+    --bs-navbar-disabled-color:         var(--theme-muted);
+    --bs-navbar-toggler-border-color:   var(--theme-border);
+    --bs-navbar-toggler-focus-width:    0.2rem;
+}
+
+.dropdown-menu {
+    --bs-dropdown-color:                var(--theme-ink);
+    --bs-dropdown-bg:                   var(--theme-bg);
+    --bs-dropdown-border-color:         var(--theme-border);
+    --bs-dropdown-divider-bg:           var(--theme-border);
+    --bs-dropdown-link-color:           var(--theme-ink);
+    --bs-dropdown-link-hover-color:     var(--theme-ink);
+    --bs-dropdown-link-hover-bg:        var(--theme-callout-bg);
+    --bs-dropdown-link-active-color:    var(--theme-accent-fg);
+    --bs-dropdown-link-active-bg:       var(--theme-accent-bg);
+    --bs-dropdown-link-disabled-color:  var(--theme-muted);
+    --bs-dropdown-header-color:         var(--theme-muted);
+}
+
+// Used for the theme toggle and for the Details / Video buttons on session
+// cards, so it carries most of the theme's buttons.
+.btn-outline-secondary {
+    --bs-btn-color:                     var(--theme-link);
+    --bs-btn-border-color:              var(--theme-border);
+    --bs-btn-hover-color:               var(--theme-accent-fg);
+    --bs-btn-hover-bg:                  var(--theme-accent-bg);
+    --bs-btn-hover-border-color:        var(--theme-accent-bg);
+    --bs-btn-active-color:              var(--theme-accent-fg);
+    --bs-btn-active-bg:                 var(--theme-accent-bg);
+    --bs-btn-active-border-color:       var(--theme-accent-bg);
+    --bs-btn-disabled-color:            var(--theme-muted);
+    --bs-btn-disabled-border-color:     var(--theme-border);
 }
 
 .nav-item {
@@ -350,7 +420,6 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
 
     &:hover {
         font-weight: 900;
-        color: var(--theme-link);
     }
 }
 
@@ -368,19 +437,10 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     font-weight: 900;
 }
 
-// The theme toggle is an outline button, and Bootstrap's outline variants
-// bake in their own greys rather than reading the theme, so point it at the
-// palette explicitly.
+// The toggle inherits the .btn-outline-secondary overrides above; it only needs
+// its label kept on one line as the icon and word change.
 #themeToggle {
-    --bs-btn-color: var(--theme-ink);
-    --bs-btn-border-color: var(--theme-border);
-    --bs-btn-hover-color: #{$white};
-    --bs-btn-hover-bg: var(--theme-link);
-    --bs-btn-hover-border-color: var(--theme-link);
-    --bs-btn-focus-shadow-rgb: 184, 94, 0;
-    --bs-btn-active-color: #{$white};
-    --bs-btn-active-bg: var(--theme-link);
-    --bs-btn-active-border-color: var(--theme-link);
+    white-space: nowrap;
 }
 
 .feature-image {
