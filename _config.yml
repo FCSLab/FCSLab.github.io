@@ -19,6 +19,38 @@ plugins:
   - jekyll-seo-tag
   - jekyll-redirect-from # lets a moved page keep its old URL via `redirect_from:`
 
+# ---------------------------------------------------------------------------
+# Colour scheme
+# ---------------------------------------------------------------------------
+# Four base colours drive every colour on the site. Link colours, callout
+# boxes, table rules, calendar events and the whole dark scheme are derived
+# from these in assets/styles.scss, so changing these four values restyles
+# everything — including Bootstrap's own components.
+#
+# Defaults are Wada Sanzo, "A Dictionary of Color Combinations", plate 243.
+#
+# Derived values are checked against WCAG AA (4.5:1 for text, 3:1 for borders
+# and large text) in both light and dark mode. If you change these, re-check —
+# `ink` in particular carries body text in light mode and the page background
+# in dark mode, so it needs to stay dark.
+colours:
+  primary:   "#b85e00" # burnt orange — links, primary actions, keynote events
+  highlight: "#ebd999" # pale sand — dark-mode text, warning surfaces
+  secondary: "#58771e" # olive — info boxes, paper sessions
+  ink:       "#1b3644" # deep teal — body text (light), page background (dark)
+
+# Colour per session `type:` on the calendar. Values are palette-derived and
+# verified to carry a white event label at AA. Add an entry for any new type.
+session_colours:
+  admin:         "#18303c"
+  keynote:       "#a55908"
+  papers:        "#516f23"
+  artworks:      "#844400"
+  workshops:     "#365333"
+  installations: "#5b6e78"
+  discussion:    "#465f18"
+  break:         "#6a7464"
+
 # Top-level nav. Add a `children:` list to any entry to turn it into a
 # dropdown; `url:` on the parent is then optional (omit it for a menu label
 # that isn't itself a page).

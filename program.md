@@ -13,18 +13,13 @@ The programme is also available [grouped by day and session]({% link program-by-
 <script>
   var calendarEvents = (function () {
     var sessions = {{ sorted_sessions | jsonify }};
-    var typeColours = {
-      admin:         '#2e312d',
-      keynote:       '#b69255',
-      papers:        '#7e7a72',
-      artworks:      '#565b68',
-      workshops:     '#5f6e62',
-      discussion:    '#97a7b6',
-      installations: '#97a7b6',
-      break:         '#8f95a5'
-    };
+    // Colour per session type, from `session_colours:` in _config.yml. Falls
+    // back to the palette's link colour for any type not listed there.
+    var typeColours = {{ site.session_colours | jsonify }};
+    var fallback = getComputedStyle(document.documentElement)
+      .getPropertyValue('--theme-link').trim() || '#b85e00';
     return sessions.map(function (session) {
-      var colour = typeColours[session.type];
+      var colour = typeColours[session.type] || fallback;
       return Object.assign({}, session, {
         url: '{{ site.baseurl }}/sessions/' + session.id + '.html',
         backgroundColor: colour,
@@ -33,6 +28,16 @@ The programme is also available [grouped by day and session]({% link program-by-
     });
   })();
 </script>
+
+<h2>Session Types</h2>
+
+<p>
+{% for pair in site.session_colours %}
+<span class="session-key">
+  <span class="session-key-swatch" style="background: {{ pair[1] }};"></span>{{ pair[0] | capitalize }}
+</span>
+{% endfor %}
+</p>
 
 {% include calendar-timezone-picker.html
    default_timezone="Australia/Sydney"

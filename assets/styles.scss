@@ -1,6 +1,7 @@
 ---
 ---
 @use "sass:color";
+@use "sass:math";
 
 // Fonts
 $header-font: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -54,7 +55,8 @@ blockquote {
 
 blockquote p {
     padding: 15px;
-    background: #eee;
+    background: var(--theme-callout-bg);
+    color: var(--theme-ink);
     border-radius: 5px;
 }
 
@@ -96,14 +98,145 @@ article {
     }
 }
 
-$ui-background: #7B8593ff;
-$ui-gradient: linear-gradient(90deg, rgb(116, 134, 177), rgb(99, 96, 104));
+// ===========================================================================
+// Colour scheme
+// ===========================================================================
+// The four base colours come from `colours:` in _config.yml — edit them there,
+// not here. Everything below is derived from them, for both light and dark
+// mode, and published as CSS custom properties so components (and the calendar
+// JavaScript) all read from one place.
+//
+// Derived values are checked against WCAG AA in both modes: 4.5:1 for text,
+// 3:1 for borders and large text. The comments record the measured ratio
+// against the surface each colour actually sits on, so if you change the base
+// colours you can see which relationships need re-checking.
 
-$ui-0: #373840ff;
-$ui-1: rgb(116, 134, 177);
-$ui-2: rgb(55, 54, 67);
-$ui-3: rgb(99, 96, 104);
-$ui-4: #4d4bcd;
+$c-primary:   {{ site.colours.primary   | default: "#b85e00" }};
+$c-highlight: {{ site.colours.highlight | default: "#ebd999" }};
+$c-secondary: {{ site.colours.secondary | default: "#58771e" }};
+$c-ink:       {{ site.colours.ink       | default: "#1b3644" }};
+
+$white: #ffffff;
+$black: #000000;
+
+// Rounds a colour's channels to whole numbers so Sass emits plain hex rather
+// than fractional `rgb(62.9215686275%, ...)`. Purely so the compiled
+// stylesheet stays readable when you inspect what the palette produced.
+@function crisp($color) {
+    @return rgb(
+        math.round(color.channel($color, "red", $space: rgb)),
+        math.round(color.channel($color, "green", $space: rgb)),
+        math.round(color.channel($color, "blue", $space: rgb))
+    );
+}
+
+// `mix` blends two palette colours; the weight is how much of the first.
+@function mix($color1, $color2, $weight) {
+    @return crisp(color.mix($color1, $color2, $weight));
+}
+
+// --- Light mode surfaces and text -----------------------------------------
+$light-bg:        $white;
+$light-surface:   mix($c-ink, $white, 4%);
+$light-ink:       $c-ink;                                 // 12.67:1 on white
+$light-muted:     mix($c-ink, $white, 68%);         //  4.72:1 on white
+$light-border:    mix($c-ink, $white, 55%);         //  3.29:1 on white
+$light-link:      mix($c-primary, $c-ink, 85%);     //  5.39:1 on white
+
+// --- Dark mode surfaces and text ------------------------------------------
+// `ink` becomes the page background here; the pure base colour is the raised
+// surface, so cards and callouts sit visibly above the page.
+$dark-bg:         mix($c-ink, $black, 70%);
+$dark-surface:    $c-ink;
+$dark-ink:        mix($c-highlight, $white, 80%);   // 11.91:1 on dark-bg
+$dark-muted:      mix($c-highlight, $dark-bg, 62%); //  5.11:1 on dark-bg
+$dark-border:     mix($c-ink, $c-highlight, 58%);   //  3.49:1 on dark-bg
+$dark-link:       mix($c-primary, $c-highlight, 52%); // 6.18 / 5.03:1 on bg / surface
+
+// --- Callout box accents --------------------------------------------------
+// Light mode tints the accent toward white; dark mode mixes it into the page
+// background instead. Mixing toward white in both — which is what this theme
+// used to do — leaves a pale box behind light dark-mode text at 1.11:1.
+$light-callout-bg:  mix($c-ink, $white, 10%);
+$light-info-bg:     mix($c-secondary, $white, 10%);
+$light-warning-bg:  mix($c-primary, $white, 10%);
+
+$dark-callout-bg:   mix($c-ink, $dark-bg, 20%);
+$dark-info-bg:      mix($c-secondary, $dark-bg, 20%);
+$dark-warning-bg:   mix($c-primary, $dark-bg, 20%);
+
+// Accents are lightened in dark mode so the border stays visible on the
+// darker box fill.
+$dark-callout-accent: mix($c-highlight, $dark-surface, 55%);
+$dark-info-accent:    mix($c-secondary, $c-highlight, 55%);
+$dark-warning-accent: mix($c-primary, $c-highlight, 55%);
+
+// Link hover reverses to white on a gradient. Both ends and the midpoint are
+// darkened toward ink so white text clears AA across the whole sweep.
+$gradient-start: mix($c-primary, $c-ink, 88%);      // white at 5.21:1
+$gradient-end:   mix($c-secondary, $c-ink, 88%);    // white at 5.76:1
+
+:root {
+    --theme-bg:             #{$light-bg};
+    --theme-surface:        #{$light-surface};
+    --theme-ink:            #{$light-ink};
+    --theme-muted:          #{$light-muted};
+    --theme-border:         #{$light-border};
+    --theme-link:           #{$light-link};
+
+    --theme-callout-bg:     #{$light-callout-bg};
+    --theme-callout-accent: #{$c-ink};
+    --theme-info-bg:        #{$light-info-bg};
+    --theme-info-accent:    #{$c-secondary};
+    --theme-warning-bg:     #{$light-warning-bg};
+    --theme-warning-accent: #{$c-primary};
+
+    --theme-gradient: linear-gradient(90deg, #{$gradient-start}, #{$gradient-end});
+
+    // Hand the palette to Bootstrap so its own components stop using the
+    // stock blues and greys.
+    --bs-body-bg:          #{$light-bg};
+    --bs-body-color:       #{$light-ink};
+    --bs-emphasis-color:   #{$c-ink};
+    --bs-heading-color:    #{$c-ink};
+    --bs-secondary-color:  #{$light-muted};
+    --bs-secondary-bg:     #{$light-surface};
+    --bs-tertiary-bg:      #{$light-callout-bg};
+    --bs-border-color:     #{$light-border};
+    --bs-link-color:       #{$light-link};
+    --bs-link-hover-color: #{mix($c-primary, $c-ink, 70%)};
+    --bs-primary:          #{$c-primary};
+    --bs-primary-rgb:      #{color.channel($c-primary, "red", $space: rgb)}, #{color.channel($c-primary, "green", $space: rgb)}, #{color.channel($c-primary, "blue", $space: rgb)};
+}
+
+// Scoped with `:root` so this always outranks Bootstrap's own
+// `[data-bs-theme="dark"]` block regardless of stylesheet order.
+:root[data-bs-theme="dark"] {
+    --theme-bg:             #{$dark-bg};
+    --theme-surface:        #{$dark-surface};
+    --theme-ink:            #{$dark-ink};
+    --theme-muted:          #{$dark-muted};
+    --theme-border:         #{$dark-border};
+    --theme-link:           #{$dark-link};
+
+    --theme-callout-bg:     #{$dark-callout-bg};
+    --theme-callout-accent: #{$dark-callout-accent};
+    --theme-info-bg:        #{$dark-info-bg};
+    --theme-info-accent:    #{$dark-info-accent};
+    --theme-warning-bg:     #{$dark-warning-bg};
+    --theme-warning-accent: #{$dark-warning-accent};
+
+    --bs-body-bg:          #{$dark-bg};
+    --bs-body-color:       #{$dark-ink};
+    --bs-emphasis-color:   #{$white};
+    --bs-heading-color:    #{$dark-ink};
+    --bs-secondary-color:  #{$dark-muted};
+    --bs-secondary-bg:     #{$dark-surface};
+    --bs-tertiary-bg:      #{$dark-callout-bg};
+    --bs-border-color:     #{$dark-border};
+    --bs-link-color:       #{$dark-link};
+    --bs-link-hover-color: #{mix($c-highlight, $c-primary, 40%)};
+}
 
 .nav-item {
     .active {
@@ -112,22 +245,37 @@ $ui-4: #4d4bcd;
 
     &:hover {
         font-weight: 900;
-        color: $ui-4;
+        color: var(--theme-link);
     }
 }
 
 .container a, main a {
-    color: $ui-4;
+    color: var(--theme-link);
     font-weight: 500;
 
     &:hover {
-        color: #fff;
-        background: $ui-gradient !important;
+        color: $white;
+        background: var(--theme-gradient) !important;
     }
 }
 
 .navbar-brand {
     font-weight: 900;
+}
+
+// The theme toggle is an outline button, and Bootstrap's outline variants
+// bake in their own greys rather than reading the theme, so point it at the
+// palette explicitly.
+#themeToggle {
+    --bs-btn-color: var(--theme-ink);
+    --bs-btn-border-color: var(--theme-border);
+    --bs-btn-hover-color: #{$white};
+    --bs-btn-hover-bg: var(--theme-link);
+    --bs-btn-hover-border-color: var(--theme-link);
+    --bs-btn-focus-shadow-rgb: 184, 94, 0;
+    --bs-btn-active-color: #{$white};
+    --bs-btn-active-bg: var(--theme-link);
+    --bs-btn-active-border-color: var(--theme-link);
 }
 
 .feature-image {
@@ -138,16 +286,15 @@ $ui-4: #4d4bcd;
     background-position: center;
 }
 
-// Callout boxes (adapted from the ANU neotheme).
-@function tint($color, $level: 0) {
-    @return color.mix(#ffffff, $color, $level * 22%);
-}
-
+// Callout boxes (adapted from the ANU neotheme). Colours come from the custom
+// properties above, so each box has a genuinely dark fill in dark mode instead
+// of a pale one that swallows the body text.
 %callout-box {
     padding: 1rem;
-    border-top: 4px solid tint(#000000, 3);
-    background-color: tint(#000000, 4);
     margin: 1rem 0;
+    border-top: 4px solid var(--theme-callout-accent);
+    background-color: var(--theme-callout-bg);
+    color: var(--theme-ink);
 
     *:first-child {
         margin-top: 0;
@@ -162,20 +309,33 @@ $ui-4: #4d4bcd;
     @extend %callout-box;
 }
 
-$info-color: #0d6efd;
-
 .info-box {
     @extend %callout-box;
-    border-color: $info-color;
-    background: tint($info-color, 4);
+    border-top-color: var(--theme-info-accent);
+    background-color: var(--theme-info-bg);
 }
-
-$warning-color: #ffc107;
 
 .warning-box {
     @extend %callout-box;
-    border-color: $warning-color;
-    background: tint($warning-color, 4);
+    border-top-color: var(--theme-warning-accent);
+    background-color: var(--theme-warning-bg);
+}
+
+// Legend for the calendar's session-type colours.
+.session-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 1rem 0.5rem 0;
+    white-space: nowrap;
+}
+
+.session-key-swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.2rem;
+    border: 1px solid var(--theme-border);
+    flex: 0 0 auto;
 }
 
 // Collapsible day groups for the programme pages. Uses <details>/<summary> so

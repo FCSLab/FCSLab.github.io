@@ -242,6 +242,60 @@ provide this" is a useful answer and silence is not.
 
 The theme includes [`jekyll-seo-tag`](https://github.com/jekyll/jekyll-seo-tag/) for metadata in page headers. See its [usage page](https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md) for the front-matter keys it consumes (`title`, `description`, `image`, `author`, and so on).
 
+### Colour scheme
+
+Four base colours in `_config.yml` drive every colour on the site — links,
+callout boxes, table rules, borders, Bootstrap's own components, and the whole
+dark scheme:
+
+```yaml
+colours:
+  primary:   "#b85e00"  # links, primary actions, keynote events
+  highlight: "#ebd999"  # dark-mode text, warning surfaces
+  secondary: "#58771e"  # info boxes, paper sessions
+  ink:       "#1b3644"  # body text (light), page background (dark)
+```
+
+Defaults are Wada Sanzo plate 243. Change these four and everything follows.
+
+`assets/styles.scss` derives light and dark values from them and publishes both
+sets as CSS custom properties (`--theme-bg`, `--theme-ink`, `--theme-link`,
+`--theme-info-bg`, and so on), then hands the palette to Bootstrap by
+overriding `--bs-*`. Component rules only ever reference the custom properties,
+never a literal colour, so nothing can strand a hardcoded value in one mode.
+
+The dark values are **not** the light values lightened. Light mode mixes each
+accent toward white; dark mode mixes it into the page background instead. Doing
+the former in both — which this theme used to do — leaves callout boxes with a
+pale fill behind light dark-mode body text, at about 1.1:1.
+
+`ink` does double duty as light-mode body text and the dark-mode page
+background, so it needs to stay dark. `highlight` carries dark-mode text and
+needs to stay light.
+
+#### Contrast
+
+Every derived pair is checked against WCAG AA — 4.5:1 for text, 3:1 for borders
+and large text — in both modes. The measured ratio is recorded in a comment
+beside each derived value in `assets/styles.scss`, against the surface that
+colour actually sits on.
+
+If you change the base colours, re-check. The tightest relationships are the
+link colour on raised surfaces (cards and callouts, not the page background)
+and the callout accent against its own fill; those are the first to fail.
+
+#### Session colours
+
+`session_colours:` in `_config.yml` maps each session `type:` to a calendar
+event colour. FullCalendar puts a white label on these, so each one is verified
+to carry white text at AA. Add an entry when you add a session type — anything
+unlisted falls back to the palette's link colour. `/program/` renders a legend
+from the same map, so the key can't drift from the calendar.
+
+Eight colours derived from four bases means some pairs sit close together in
+hue. They are spread across lightness as well, which helps, but if you need
+them more distinct that is the place to adjust.
+
 ### Styling
 
 Styles live in `assets/styles.scss` on top of Bootstrap 5.3.0. To override theme styles in a consuming site, create your own `assets/styles.scss` with the same path — Jekyll will prefer the site's copy over the one from the gem. `_sass/` is available for partials if you want to split things up.
