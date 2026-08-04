@@ -195,7 +195,7 @@ consuming site as a starting point; they are ordinary pages, not layouts.
 
 | Page | View |
 | --- | --- |
-| `program.md` | FullCalendar timetable plus a card grid, with a timezone picker. |
+| `program.md` | FullCalendar timetable plus a card grid, with a timezone picker. Opens on the conference, not on today. |
 | `program-by-session.md` | Day-by-day accordion, each day split into always-on / morning / afternoon. |
 | `program-by-track.md` | Flat list of every contribution grouped by `track` — the page attendees use to find one specific work. |
 
@@ -283,6 +283,27 @@ colour actually sits on.
 If you change the base colours, re-check. The tightest relationships are the
 link colour on raised surfaces (cards and callouts, not the page background)
 and the callout accent against its own fill; those are the first to fail.
+
+#### Calendar date range
+
+The calendar works out the conference span from the event data: it opens on the
+first day with activity, sizes the grid to exactly the number of days the
+programme covers, and fences navigation to that range with `validRange`. A
+conference website is read for years afterwards, so anchoring the view to
+"today" would show an empty grid to almost everyone who visits.
+
+Because the whole conference is already on screen, the header's `prev` / `next` /
+`today` buttons are dropped — there is nowhere to page to. They come back only if
+the span exceeded `max_days` (default 10) and had to be truncated, which in
+practice means a typo in a date; that case also logs a console warning naming the
+offending range rather than silently rendering a months-long grid.
+
+Days are compared as `YYYY-MM-DD` strings sliced off the front of each ISO
+timestamp, so an event belongs to the day its own timestamp names regardless of
+the viewer's timezone or the picker's current selection. An event ending at
+exactly midnight closes the previous day rather than opening a new empty one.
+
+Pass `duration_days` to the include to override the derived span.
 
 #### Session colours
 

@@ -17,7 +17,11 @@
     default_timezone_label  Visible label for the default timezone option.
                             Default: prettified form of default_timezone.
     initial_view            FullCalendar initial view name. Default: "timeGridFourDay".
-    duration_days           Days shown in timeGridFourDay. Default: 4.
+    duration_days           Days shown in the grid. Default: derived from the
+                            events, so the view spans exactly the conference and
+                            no empty days appear.
+    max_days                Safety cap on the derived span, in case a stray
+                            event has a wrong year. Default: 10.
     timezones_json          URL of a JSON array of IANA timezone names.
                             Default: "/assets/timezones.json".
     fullcalendar_src        URL of the FullCalendar global bundle.
@@ -33,7 +37,8 @@
 {%- assign default_timezone = include.default_timezone | default: "UTC" -%}
 {%- assign default_timezone_label = include.default_timezone_label | default: default_timezone -%}
 {%- assign initial_view = include.initial_view | default: "timeGridFourDay" -%}
-{%- assign duration_days = include.duration_days | default: 4 -%}
+{%- assign duration_days = include.duration_days -%}
+{%- assign max_days = include.max_days | default: 10 -%}
 {%- assign timezones_json = include.timezones_json | default: "/assets/timezones.json" -%}
 {%- comment -%}
   Calendar dependencies are vendored under assets/imports/. Override
@@ -54,7 +59,7 @@
     <option value="UTC">UTC</option>
     <option value="{{ default_timezone }}" selected>{{ default_timezone_label }}</option>
   </select>
-  <span id="{{ display_id }}" style="margin-left: 10px; font-weight: bold; color: #666;"></span>
+  <span id="{{ display_id }}" class="calendar-timezone-current"></span>
 </div>
 
 <div id="{{ calendar_id }}"></div>
@@ -62,7 +67,65 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var events = (typeof {{ events_var }} !== 'undefined') ? {{ events_var }} : [];
-    var firstEventDate = events.length ? events[0].start : undefined;
+
+    // Work out the conference span from the events themselves, so the calendar
+    // opens on the conference — not on whatever today happens to be — and shows
+    // exactly the days that have activity. Dates are compared as YYYY-MM-DD
+    // strings taken off the front of each ISO timestamp, which sidesteps any
+    // timezone conversion: an event's day is the day its own timestamp names.
+    var MAX_DAYS = {{ max_days }};
+
+    function dayOf(iso) {
+      var s = String(iso || '');
+      return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
+    }
+
+    function shiftDay(day, delta) {
+      var d = new Date(day + 'T12:00:00');
+      d.setDate(d.getDate() + delta);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function daysBetween(from, to) {
+      return Math.round(
+        (new Date(to + 'T12:00:00') - new Date(from + 'T12:00:00')) / 86400000
+      );
+    }
+
+    var days = [];
+    events.forEach(function (ev) {
+      var startDay = dayOf(ev.start);
+      if (!startDay) return;
+      days.push(startDay);
+
+      // A recurring entry runs to endRecur; a plain one to end. An end at
+      // exactly midnight closes the previous day rather than opening a new one.
+      var finish = ev.endRecur || ev.end;
+      var endDay = dayOf(finish);
+      if (endDay && endDay !== startDay) {
+        if (/T00:00(:00)?/.test(String(finish))) endDay = shiftDay(endDay, -1);
+        if (endDay >= startDay) days.push(endDay);
+      }
+    });
+    days.sort();
+
+    var firstDay = days.length ? days[0] : null;
+    var lastDay = days.length ? days[days.length - 1] : null;
+
+    var span = firstDay ? daysBetween(firstDay, lastDay) + 1 : 0;
+    var capped = span > MAX_DAYS;
+    if (capped) {
+      console.warn(
+        'Calendar: events span ' + span + ' days (' + firstDay + ' to ' + lastDay +
+        '), which exceeds max_days=' + MAX_DAYS + '. Showing the first ' +
+        MAX_DAYS + ' days — check for an event with a wrong date.'
+      );
+      span = MAX_DAYS;
+    }
+
+    {%- if duration_days %}
+    span = {{ duration_days }};
+    {%- endif %}
 
     var calendarEl = document.getElementById({{ calendar_id | jsonify }});
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -71,12 +134,27 @@
       views: {
         timeGridFourDay: {
           type: 'timeGrid',
-          duration: { days: {{ duration_days }} }
+          duration: { days: span || 4 }
         }
       },
       events: events,
-      initialDate: firstEventDate,
+      // Open on the first day of the conference.
+      initialDate: firstDay || undefined,
+      // Fence navigation to the conference. `end` is exclusive, so this is the
+      // day after the last one with activity. With the view already covering
+      // the whole span there is nowhere left to page to, and the header's
+      // navigation buttons are dropped below.
+      validRange: firstDay && !capped
+        ? { start: firstDay, end: shiftDay(lastDay, 1) }
+        : undefined,
+      // Only offer paging when the span had to be capped; otherwise the whole
+      // conference is already on screen and `today` would be meaningless.
+      headerToolbar: capped
+        ? { left: 'title', center: '', right: 'prev,next' }
+        : { left: 'title', center: '', right: '' },
       slotEventOverlap: false,
+      // Drawn only when today falls inside the visible range, so this is
+      // inert outside the conference and a useful marker during it.
       nowIndicator: true,
       timeZone: {{ default_timezone | jsonify }},
       eventContent: function (arg) {

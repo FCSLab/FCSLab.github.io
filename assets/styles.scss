@@ -321,6 +321,27 @@ $gradient-end:   mix($c-secondary, $c-ink, 88%);    // white at 5.76:1
     background-color: var(--theme-warning-bg);
 }
 
+// Calendar. FullCalendar's bootstrap5 theme picks up most Bootstrap variables
+// but hardcodes a few greys, so point those at the palette too — otherwise the
+// grid keeps light rules and light-grey shading in dark mode.
+.calendar-timezone-picker {
+    margin-bottom: 0.75rem;
+}
+
+.calendar-timezone-current {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--theme-muted);
+}
+
+.fc {
+    --fc-border-color: var(--theme-border);
+    --fc-page-bg-color: var(--theme-bg);
+    --fc-neutral-bg-color: var(--theme-callout-bg);
+    --fc-today-bg-color: var(--theme-surface);
+    --fc-now-indicator-color: var(--theme-warning-accent);
+}
+
 // Legend for the calendar's session-type colours.
 .session-key {
     display: inline-flex;
