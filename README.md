@@ -387,6 +387,14 @@ timestamp, so an event belongs to the day its own timestamp names regardless of
 the viewer's timezone or the picker's current selection. An event ending at
 exactly midnight closes the previous day rather than opening a new empty one.
 
+Day arithmetic on those strings runs in **UTC**, via `Date.UTC`. This matters:
+`new Date('2025-10-17T12:00:00')` parses as *local* time, so reading it back out
+with `toISOString()` crosses a date boundary wherever the viewer's offset exceeds
+±12h — Auckland at +13, Chatham at +13:45, Kiritimati at +14, and UTC−12 the
+other way. That shifted the computed range by a day for those viewers and clipped
+the last day of the conference. Picking a midday anchor dodges DST but not this;
+staying in UTC avoids both, since UTC has no DST either.
+
 Pass `duration_days` to the include to override the derived span.
 
 #### Session colours

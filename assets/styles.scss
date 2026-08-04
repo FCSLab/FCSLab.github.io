@@ -411,6 +411,8 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --bs-btn-active-border-color:       var(--theme-accent-bg);
     --bs-btn-disabled-color:            var(--theme-muted);
     --bs-btn-disabled-border-color:     var(--theme-border);
+    // Bootstrap's focus glow for this variant is a literal grey (108,117,125).
+    --bs-btn-focus-shadow-rgb:          #{rgb-channels($c-primary)};
 }
 
 .nav-item {
@@ -571,8 +573,14 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
             line-height: 1.2;
         }
 
+        // The summary is the only focusable thing in the accordion, so this
+        // outline is the entire focus indicator and has to clear 3:1 against
+        // the summary's own fill. Bootstrap's translucent --bs-focus-ring-color
+        // manages 1.55:1 light and 1.37:1 dark over that fill — fine as a
+        // supplementary glow beside a border change, not as the only signal.
+        // A solid link-coloured outline gives 4.63:1 and 5.00:1.
         &:focus-visible {
-            outline: 3px solid rgba(13, 110, 253, 0.35);
+            outline: 3px solid var(--theme-link);
             outline-offset: -3px;
         }
     }

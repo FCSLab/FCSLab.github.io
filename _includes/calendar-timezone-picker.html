@@ -80,16 +80,26 @@
       return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
     }
 
+    // Day arithmetic runs entirely in UTC. `new Date('2025-10-17T12:00:00')`
+    // parses as *local* time, so round-tripping it back out through
+    // toISOString() crosses a date boundary wherever the offset exceeds ±12h —
+    // Auckland at +13, Chatham at +13:45, Kiritimati at +14, and UTC-12 the
+    // other way — which shifted the computed range by a day for those viewers.
+    // Building from Date.UTC keeps the arithmetic in the same frame the strings
+    // are written in, and UTC has no DST to step around either.
+    function toUTCDate(day) {
+      var p = day.split('-');
+      return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    }
+
     function shiftDay(day, delta) {
-      var d = new Date(day + 'T12:00:00');
-      d.setDate(d.getDate() + delta);
+      var d = toUTCDate(day);
+      d.setUTCDate(d.getUTCDate() + delta);
       return d.toISOString().slice(0, 10);
     }
 
     function daysBetween(from, to) {
-      return Math.round(
-        (new Date(to + 'T12:00:00') - new Date(from + 'T12:00:00')) / 86400000
-      );
+      return Math.round((toUTCDate(to) - toUTCDate(from)) / 86400000);
     }
 
     var days = [];
