@@ -284,6 +284,15 @@ If you change the base colours, re-check. The tightest relationships are the
 link colour on raised surfaces (cards and callouts, not the page background)
 and the callout accent against its own fill; those are the first to fail.
 
+The link hover reverses to white on a gradient that stays inside the primary
+hue, ramping only in lightness. An earlier version ran from primary to
+secondary; across an inline link a few characters wide that reads as lurid,
+because the two are close in luminance and the sweep is almost pure hue
+rotation. Keeping one hue and varying lightness gives the same effect without
+the clash. White clears AA at every point along the ramp, and the light end is
+the binding constraint — the base primary manages only 4.53:1 by itself, so
+both ends sit slightly darkened toward `ink`.
+
 #### Calendar date range
 
 The calendar works out the conference span from the event data: it opens on the

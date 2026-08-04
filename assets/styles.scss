@@ -171,10 +171,16 @@ $dark-callout-accent: mix($c-highlight, $dark-surface, 55%);
 $dark-info-accent:    mix($c-secondary, $c-highlight, 55%);
 $dark-warning-accent: mix($c-primary, $c-highlight, 55%);
 
-// Link hover reverses to white on a gradient. Both ends and the midpoint are
-// darkened toward ink so white text clears AA across the whole sweep.
-$gradient-start: mix($c-primary, $c-ink, 88%);      // white at 5.21:1
-$gradient-end:   mix($c-secondary, $c-ink, 88%);    // white at 5.76:1
+// Link hover reverses to white on a gradient. This stays within the primary
+// hue — a two-colour ramp across primary and secondary reads as lurid at the
+// size of an inline link, where the whole sweep is a few characters wide.
+//
+// The light end is the binding constraint: it carries white text, and the base
+// primary only manages 4.53:1 on its own, so both ends sit slightly darkened
+// toward ink to keep a real margin. Widening this ramp much past 70%–92% costs
+// either contrast at the light end or subtlety at the dark end.
+$gradient-start: mix($c-primary, $c-ink, 70%);      // white at 6.40:1
+$gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
 
 :root {
     --theme-bg:             #{$light-bg};
