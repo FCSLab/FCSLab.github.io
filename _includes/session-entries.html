@@ -1,0 +1,40 @@
+{% comment %}
+  Finds the proceedings entries belonging to a session and exposes them as
+  `matched_entries`.
+
+  Parameters:
+    field       - the proceedings column holding session codes, e.g.
+                  "session_code" or "demo_session_code"
+    session_id  - the session to match against
+    sort_by     - column to order the results by, e.g. "session_position"
+
+  Codes may be a comma-separated list, so one entry can appear in several
+  sessions. Matching compares whole codes after stripping whitespace — a
+  substring test would make session "papers-1" swallow every entry in
+  "papers-10" through "papers-19".
+
+  Usage:
+    {% include session-entries.html field="session_code"
+       session_id=page.entry.id sort_by="session_position" %}
+{% endcomment %}
+
+{% assign matched_entries = "" | split: "" %}
+{% for entry in site.data.proceedings %}
+  {% assign raw_codes = entry[include.field] %}
+  {% if raw_codes and raw_codes != "" %}
+    {% assign matched = false %}
+    {% assign codes = raw_codes | split: "," %}
+    {% for code in codes %}
+      {% assign trimmed = code | strip %}
+      {% if trimmed == include.session_id %}
+        {% assign matched = true %}
+      {% endif %}
+    {% endfor %}
+    {% if matched %}
+      {% assign matched_entries = matched_entries | push: entry %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if include.sort_by %}
+  {% assign matched_entries = matched_entries | sort: include.sort_by %}
+{% endif %}

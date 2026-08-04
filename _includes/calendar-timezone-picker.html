@@ -35,12 +35,17 @@
 {%- assign initial_view = include.initial_view | default: "timeGridFourDay" -%}
 {%- assign duration_days = include.duration_days | default: 4 -%}
 {%- assign timezones_json = include.timezones_json | default: "/assets/timezones.json" -%}
-{%- assign fullcalendar_src = include.fullcalendar_src | default: "https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js" -%}
+{%- comment -%}
+  Calendar dependencies are vendored under assets/imports/. Override
+  `fullcalendar_src` to point somewhere else if you need a different build.
+{%- endcomment -%}
+{%- capture vendored_fullcalendar -%}{% link assets/imports/fullcalendar/index.global.min.js %}{%- endcapture -%}
+{%- assign fullcalendar_src = include.fullcalendar_src | default: vendored_fullcalendar -%}
 
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/min/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment-timezone@0.5.40/builds/moment-timezone-with-data.min.js"></script>
+<script src="{% link assets/imports/moment/moment.min.js %}"></script>
+<script src="{% link assets/imports/moment/moment-timezone-with-data.min.js %}"></script>
 <script src="{{ fullcalendar_src }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/moment-timezone@6.1.17/index.global.min.js"></script>
+<script src="{% link assets/imports/fullcalendar/moment-timezone.global.min.js %}"></script>
 
 <div class="calendar-timezone-picker">
   Timezone:

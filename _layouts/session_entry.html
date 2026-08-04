@@ -35,25 +35,12 @@ layout: default
     {{ page.entry.abstract | markdownify }}
     {% endif %}
 
-    {% assign session_papers = "" | split: "" %}
-    {% for paper in site.data.proceedings %}
-      {% if paper.session_code %}
-        {% assign paper_codes = paper.session_code | split: "," %}
-        {% assign matched = false %}
-        {% for code in paper_codes %}
-          {% assign trimmed = code | strip %}
-          {% if trimmed == page.entry.id %}
-            {% assign matched = true %}
-          {% endif %}
-        {% endfor %}
-        {% if matched %}
-          {% assign session_papers = session_papers | push: paper %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-    {% unless session_papers == empty %}
-    {% assign session_papers = session_papers | sort: 'session_position' %}
+    {% comment %} Entries scheduled in this session. {% endcomment %}
+    {% include session-entries.html field="session_code"
+       session_id=page.entry.id sort_by="session_position" %}
+    {% assign session_papers = matched_entries %}
 
+    {% unless session_papers == empty %}
     <h2>Presentations:</h2>
     <ul>
     {% for paper in session_papers %}
@@ -61,6 +48,31 @@ layout: default
       <li>
         <a href="{{ proceeding_entry_url }}"><strong>{{ paper.title }}</strong></a>{% if paper.duration %} ({{ paper.duration }} minutes){% endif %}{% if paper.paper_url %} <a href="{{ paper.paper_url }}">(PDF link)</a>{% endif %}<br>
         by {{ paper.authors }}
+      </li>
+    {% endfor %}
+    </ul>
+    {% endunless %}
+
+    {% comment %}
+      Entries cross-listed into this session for a demo slot. These are
+      presented elsewhere in the programme as well, so they are listed
+      separately with a link back to their main session.
+    {% endcomment %}
+    {% include session-entries.html field="demo_session_code"
+       session_id=page.entry.id sort_by="demo_session_position" %}
+    {% assign demo_papers = matched_entries %}
+
+    {% unless demo_papers == empty %}
+    <h2>Demonstrations:</h2>
+    <ul>
+    {% for paper in demo_papers %}
+    {% capture proceeding_entry_url %}{{ paper.id | datapage_url: "proceedings" | relative_url }}{% endcapture %}
+      <li>
+        <a href="{{ proceeding_entry_url }}"><strong>{{ paper.title }}</strong></a>{% if paper.paper_url %} <a href="{{ paper.paper_url }}">(PDF link)</a>{% endif %}<br>
+        by {{ paper.authors }}
+        {% if paper.session_name %}<br>
+        <small class="text-body-secondary">Also presented in {{ paper.session_name }}</small>
+        {% endif %}
       </li>
     {% endfor %}
     </ul>

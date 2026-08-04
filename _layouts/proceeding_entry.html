@@ -2,18 +2,40 @@
 layout: default
 ---
 
+{% comment %}
+  Build parallel lists of session codes, URLs and link labels. An entry may
+  belong to several sessions, so `session_code` is a comma-separated list.
+  `session_name` is an optional parallel list of human-readable names; where a
+  name is present it is used as the link text instead of the raw code.
+{% endcomment %}
 {% if page.entry.session_code %}
   {% assign raw_codes = page.entry.session_code | split: "," %}
+  {% assign raw_names = page.entry.session_name | default: "" | split: "," %}
   {% assign session_codes = "" | split: "" %}
   {% assign session_urls = "" | split: "" %}
+  {% assign session_labels = "" | split: "" %}
   {% for raw_code in raw_codes %}
     {% assign trimmed_code = raw_code | strip %}
     {% if trimmed_code != "" %}
       {% assign session_codes = session_codes | push: trimmed_code %}
       {% assign session_url = trimmed_code | datapage_url: "sessions" | relative_url %}
       {% assign session_urls = session_urls | push: session_url %}
+      {% assign name = raw_names[forloop.index0] | default: "" | strip %}
+      {% if name == "" %}
+        {% assign name = trimmed_code %}
+      {% endif %}
+      {% assign session_labels = session_labels | push: name %}
     {% endif %}
   {% endfor %}
+{% endif %}
+
+{% if page.entry.demo_session_code and page.entry.demo_session_code != "" %}
+  {% assign demo_code = page.entry.demo_session_code | strip %}
+  {% assign demo_url = demo_code | datapage_url: "sessions" | relative_url %}
+  {% assign demo_label = page.entry.demo_session_name | default: "" | strip %}
+  {% if demo_label == "" %}
+    {% assign demo_label = demo_code %}
+  {% endif %}
 {% endif %}
 
 
@@ -41,14 +63,18 @@ layout: default
     </div>
     {% endif %}
     <ul>
+      {% if page.entry.track %}<li>Track: {{ page.entry.track | capitalize }}</li>{% endif %}
       {% if page.entry.format %}<li>Format: {{ page.entry.format }}</li>{% endif %}
       {% if session_codes and session_codes.size > 0 %}
       <li>Session:
         {% assign num = session_codes.size | minus: 1 %}
         {% for i in (0..num) %}
-          <a href="{{ session_urls[i] }}">{{ session_codes[i] }}</a>{% unless forloop.last %}, {% endunless %}
+          <a href="{{ session_urls[i] }}">{{ session_labels[i] }}</a>{% unless forloop.last %}, {% endunless %}
         {% endfor %}
       </li>
+      {% endif %}
+      {% if demo_code %}
+      <li>Demo session: <a href="{{ demo_url }}">{{ demo_label }}</a></li>
       {% endif %}
       {% if page.entry.paper_url %}<li><a href="{{ page.entry.paper_url }}">Paper PDF link</a></li>{% endif %}
       {% if page.entry.video_url %}<li><a href="{{ page.entry.video_url }}">Video link</a></li>{% endif %}

@@ -1,0 +1,48 @@
+# A second session source, for events that run alongside the main schedule
+# rather than in a slot within it — standing installations, exhibits, anything
+# always-on. Listed in `session_sources:` in _config.yml, and given its own
+# `page_gen` block so each entry still gets a session page under /sessions/.
+#
+# The fields are the same as _data/sessions.yml. Multi-day entries use
+# FullCalendar's recurrence keys (startRecur / endRecur / startTime / endTime /
+# daysOfWeek) so they repeat across days on the calendar view instead of
+# rendering as one enormous block.
+
+- id: foyer-listening-post
+  title: Listening Post
+  subtitle: Open Listening Station
+  date: Thursday–Friday 2025-10-16/17 09:00-18:00
+  start: '2025-10-16T09:00:00'
+  end: '2025-10-17T18:00:00'
+  startRecur: '2025-10-16T09:00:00'
+  endRecur: '2025-10-17T18:00:00'
+  startTime: '09:00'
+  endTime: '18:00'
+  daysOfWeek: [4, 5]
+  location: "Main Foyer"
+  type: installations
+  image_url: assets/charles-martin-ventilation.jpg
+  image_credit: Charles Martin
+  abstract: |
+    A pair of headphone stations running a continuous playlist of works
+    submitted to the Artworks call. Open for the full duration of the
+    conference — drop in between sessions.
+  allDay: false
+
+- id: gallery-open-hours
+  title: Gallery Open Hours
+  date: Thursday–Friday 2025-10-16/17 10:00-20:00
+  start: '2025-10-16T10:00:00'
+  end: '2025-10-17T20:00:00'
+  startRecur: '2025-10-16T10:00:00'
+  endRecur: '2025-10-17T20:00:00'
+  startTime: '10:00'
+  endTime: '20:00'
+  daysOfWeek: [4, 5]
+  location: "Gallery Hall"
+  type: installations
+  abstract: |
+    The Artworks exhibition stays open outside its scheduled session slot.
+    Installations are unstaffed during open hours; artists are present during
+    the exhibition session itself.
+  allDay: false

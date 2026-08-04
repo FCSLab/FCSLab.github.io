@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg">
   <div class="container-lg">
-  <a class="navbar-brand" href="#">
+  <a class="navbar-brand" href="{{ '/' | relative_url }}">
     {% if site.logo_light and site.logo_dark %}
     <img src="{{ site.logo_light | relative_url }}"
          width="80"
@@ -18,13 +18,45 @@
   <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
     <ul class="navbar-nav">
       {% for link in site.navigation_header %}
-      {% assign class = nil %}
-      {% if page.url == link.url %}
-      {% assign class = "active" %}
-      {% endif %}
-      <li class="nav-item {{ class }}">
-      <a class="nav-link {{ class }}" href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
-      </li>
+        {% comment %}
+          A nav entry is a dropdown when it has a `children:` list. A parent is
+          marked active when it or any of its children is the current page. The
+          parent `url` is optional on dropdowns — omit it for a pure menu label.
+        {% endcomment %}
+        {% assign is_active = false %}
+        {% if page.url == link.url %}
+          {% assign is_active = true %}
+        {% endif %}
+        {% for child in link.children %}
+          {% if page.url == child.url %}
+            {% assign is_active = true %}
+          {% endif %}
+        {% endfor %}
+
+        <li class="nav-item{% if link.children %} dropdown{% endif %}{% if is_active %} active{% endif %}">
+          {% if link.children %}
+          <a class="nav-link dropdown-toggle{% if is_active %} active{% endif %}"
+             href="{% if link.url %}{{ link.url | relative_url }}{% else %}#{% endif %}"
+             id="nav-{{ forloop.index }}"
+             role="button"
+             data-bs-toggle="dropdown"
+             aria-expanded="false"
+             {% if is_active %}aria-current="page"{% endif %}>{{ link.title }}</a>
+          <ul class="dropdown-menu" aria-labelledby="nav-{{ forloop.index }}">
+            {% for child in link.children %}
+            <li>
+              <a class="dropdown-item{% if page.url == child.url %} active{% endif %}"
+                 href="{{ child.url | relative_url }}"
+                 {% if page.url == child.url %}aria-current="page"{% endif %}>{{ child.title }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <a class="nav-link{% if is_active %} active{% endif %}"
+             href="{{ link.url | relative_url }}"
+             {% if is_active %}aria-current="page"{% endif %}>{{ link.title }}</a>
+          {% endif %}
+        </li>
       {% endfor %}
     </ul>
 

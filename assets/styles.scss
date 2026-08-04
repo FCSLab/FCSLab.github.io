@@ -82,6 +82,15 @@ article {
         object-fit: cover;
     }
 
+    // A square portrait for keynote speakers and similar profile images,
+    // capped so it doesn't dominate the column on wide screens.
+    .keynote-image {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        max-width: 500px !important;
+    }
+
     .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
         text-align: center;
     }
@@ -167,4 +176,121 @@ $warning-color: #ffc107;
     @extend %callout-box;
     border-color: $warning-color;
     background: tint($warning-color, 4);
+}
+
+// Collapsible day groups for the programme pages. Uses <details>/<summary> so
+// the collapse works without JavaScript. Colours come from Bootstrap custom
+// properties so the accordion follows the light/dark theme.
+.programme-day {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    padding: 0;
+    margin-bottom: 2rem;
+    overflow: hidden;
+
+    > summary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+        background: var(--bs-tertiary-bg);
+        min-height: 64px;
+
+        // Replace the native disclosure marker with a triangle that rotates.
+        &::-webkit-details-marker {
+            display: none;
+        }
+
+        &::before {
+            content: "";
+            width: 0;
+            height: 0;
+            border-top: 0.6rem solid transparent;
+            border-bottom: 0.6rem solid transparent;
+            border-left: 0.9rem solid currentColor;
+            flex: 0 0 auto;
+            transition: transform 0.2s ease;
+        }
+
+        h2 {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        &:focus-visible {
+            outline: 3px solid rgba(13, 110, 253, 0.35);
+            outline-offset: -3px;
+        }
+    }
+
+    &[open] > summary::before {
+        transform: rotate(90deg);
+    }
+}
+
+.programme-day-content {
+    padding: 0 1.25rem 1.25rem;
+}
+
+// Larger tap targets and headings on phones.
+@media (max-width: 576px) {
+    .programme-day > summary {
+        padding: 1.15rem 1rem;
+        min-height: 72px;
+        gap: 1rem;
+
+        &::before {
+            border-top-width: 0.75rem;
+            border-bottom-width: 0.75rem;
+            border-left-width: 1.05rem;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+        }
+    }
+
+    .programme-day-content {
+        padding: 0 1rem 1rem;
+    }
+}
+
+// Tables in content reflow to stacked cards on narrow screens, so a wide
+// programme or fee table stays readable on a phone without side-scrolling.
+article table {
+    border-collapse: collapse;
+    width: 100%;
+
+    th, td {
+        border: 1px solid var(--bs-border-color);
+        padding: 8px;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: var(--bs-tertiary-bg);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    article table {
+        thead {
+            display: none;
+        }
+
+        tr {
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        td {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+        }
+    }
 }

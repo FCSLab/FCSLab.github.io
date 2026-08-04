@@ -1,0 +1,9 @@
+# Local development overrides. Jekyll merges later --config files over earlier
+# ones, so serve with:
+#
+#   bundle exec jekyll serve --config _config.yml,_config.dev.yml
+#
+# Keeping url/baseurl out of _config.yml means the committed config always holds
+# the production values, and a staging deploy only has to override these two.
+url: "http://localhost:4000"
+baseurl: ""

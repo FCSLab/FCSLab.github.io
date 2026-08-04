@@ -17,4 +17,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "jekyll-toc", "~> 0.19.0"
   spec.add_runtime_dependency "jekyll-datapage-generator", "~> 1.4"
   spec.add_runtime_dependency "jekyll-seo-tag", "~> 2.8"
+  spec.add_runtime_dependency "jekyll-redirect-from", "~> 0.16"
 end

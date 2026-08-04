@@ -49,6 +49,7 @@ footer_copyright: My Conference
 plugins:
   - jekyll-datapage-generator
   - jekyll-seo-tag
+  - jekyll-redirect-from
 
 navigation_header:
   - title: Home
@@ -56,12 +57,40 @@ navigation_header:
   - title: Call
     url: /call/
   - title: Program
-    url: /program/
+    children:                 # a `children:` list makes this a dropdown
+      - title: Calendar View
+        url: /program/
+      - title: By Session
+        url: /program-by-session/
+      - title: By Track
+        url: /program-by-track/
   - title: Committee
     url: /committee/
 ```
 
 Adding a page does **not** add it to the nav — update `navigation_header` too.
+
+#### Dropdown menus
+
+Give a nav entry a `children:` list to turn it into a Bootstrap dropdown. The
+parent's own `url:` is optional — omit it for a menu label that isn't itself a
+page. A parent is marked active when it or any of its children is the current
+page.
+
+Dropdowns need Bootstrap's JS bundle, which `_includes/scripts.html` already
+loads. If you have overridden that include in your site, keep the script tag.
+
+### Local development config
+
+`_config.dev.yml` holds `url` / `baseurl` overrides for local work, so the
+committed `_config.yml` can always carry the production values:
+
+```
+bundle exec jekyll serve --config _config.yml,_config.dev.yml
+```
+
+Later `--config` files win, so a staging deploy only needs to override those two
+keys rather than fork the whole config.
 
 ### Layouts
 
@@ -71,7 +100,7 @@ Adding a page does **not** add it to the nav — update `navigation_header` too.
 | `post` | Blog-style post with title/date. Wraps `default`. |
 | `default` | Raw outer shell (nav + footer + scripts). Use when you need full control of the page body. |
 | `proceeding_entry` | Auto-applied to each row of `_data/proceedings.csv` by the data-page generator. |
-| `session_entry` | Auto-applied to each row of `_data/sessions.yml` by the data-page generator. |
+| `session_entry` | Auto-applied to each entry of every session source (`_data/sessions.yml` and friends) by the data-page generator. |
 
 Example page front matter:
 
@@ -90,10 +119,66 @@ feature_image: assets/hero.jpg
 
 The theme's headline feature is automatic generation of one page per paper and one page per session, with cross-links between them. This is driven by `jekyll-datapage-generator` and configured under `page_gen:` in `_config.yml` (see the demo config in this repo for the canonical setup).
 
-- **`_data/proceedings.csv`** → `/proceedings/<id>.html`. Columns include `id`, `title`, `authors`, `abstract`, `session_code`, `session_position`, `paper_url`, `video_url`, `slides_url`, `image_url`, `type`, `format`, `duration`, `presence`, `speaker`, `location`.
+- **`_data/proceedings.csv`** → `/proceedings/<id>.html`. Columns include `id`, `title`, `authors`, `abstract`, `track`, `session_code`, `session_name`, `session_position`, `demo_session_code`, `demo_session_name`, `demo_session_position`, `paper_url`, `video_url`, `slides_url`, `image_url`, `type`, `format`, `duration`, `presence`, `speaker`, `location`.
 - **`_data/sessions.yml`** → `/sessions/<id>.html`. Keys include `id`, `title`, `subtitle`, `chair`, `date`, `start`, `end`, `location`, `type`, `allDay`.
 
 A paper is linked to a session by matching `session_code` against a session's `id`. `session_code` may be a comma-separated list, so a single paper/artwork can appear in multiple sessions. Within a session, entries are ordered by `session_position`.
+
+`session_name` is an optional parallel list of human-readable session names. Where present it is used as the link text on the entry page instead of the raw code, so a reader sees "Papers 2: Posters & Demos" rather than `papers-2`.
+
+`track` groups entries for the by-track listing (see below). Use whatever track names your calls use — `papers`, `music`, `workshops`, and so on.
+
+#### Cross-listing an entry into a second session
+
+`demo_session_code` / `demo_session_name` / `demo_session_position` schedule an
+entry into a *second* session in addition to its main one — the usual case being
+a paper that also gets a demo slot. The demo session's page lists these
+separately under "Demonstrations", with a pointer back to where the work is
+mainly presented, and the entry page shows both sessions.
+
+This is deliberately a separate set of columns rather than another comma-separated
+`session_code`: the two appearances mean different things, need different
+ordering, and should be labelled differently for readers.
+
+#### Multiple session sources
+
+Larger programmes have events that run *alongside* the schedule rather than in a
+slot within it — standing installations, exhibits, anything always-on. List
+extra data files under `session_sources:`:
+
+```yaml
+session_sources:
+  - data: sessions
+    title: Sessions
+  - data: installations
+    title: Installations
+```
+
+Each source also needs its own `page_gen:` block. Point them at the same
+`dir: sessions` so `datapage_url: "sessions"` resolves links to all of them
+uniformly.
+
+Templates read the merged, start-sorted set through an include:
+
+```liquid
+{% include all-sessions.html %}
+{% for session in all_sessions %} ... {% endfor %}
+```
+
+Multi-day entries should use FullCalendar's recurrence keys (`startRecur`,
+`endRecur`, `startTime`, `endTime`, `daysOfWeek`) so they repeat across days on
+the calendar instead of rendering as one enormous block.
+
+#### Helper includes
+
+| Include | Purpose |
+| --- | --- |
+| `all-sessions.html` | Sets `all_sessions` — every session source merged and sorted by `start`. |
+| `session-entries.html` | Sets `matched_entries` — the proceedings entries in a given session. Takes `field`, `session_id`, `sort_by`. |
+| `session-card.html` | Renders one session as a Bootstrap card. Takes `session`. |
+
+`session-entries.html` matches whole comma-separated codes rather than
+substrings, so session `papers-1` does not swallow the entries of `papers-10`.
 
 To link between generated pages from a template, use the `datapage_url` filter:
 
@@ -103,9 +188,47 @@ To link between generated pages from a template, use the `datapage_url` filter:
 
 The string argument (`"sessions"` or `"proceedings"`) must match the `data:` key under `page_gen:`.
 
-### Program page
+### Program pages
 
-`program.md` in this repo renders a FullCalendar view by `jsonify`-ing `site.data.sessions` and injecting a `url` for each generated session page. Copy it into your consuming site as a starting point if you want the same calendar.
+The repo ships three views of the same data. Copy whichever you want into your
+consuming site as a starting point; they are ordinary pages, not layouts.
+
+| Page | View |
+| --- | --- |
+| `program.md` | FullCalendar timetable plus a card grid, with a timezone picker. |
+| `program-by-session.md` | Day-by-day accordion, each day split into always-on / morning / afternoon. |
+| `program-by-track.md` | Flat list of every contribution grouped by `track` — the page attendees use to find one specific work. |
+
+Both new pages derive their structure from the data, so they need no editing when
+the schedule changes:
+
+- Days on `program-by-session.md` come from the session `start` values. The
+  morning/afternoon split defaults to 12:30 and is set with
+  `programme_midday: "13:00"` in `_config.yml`. Entries with `type: break` are
+  listed inline rather than as cards.
+- Tracks on `program-by-track.md` are derived from the `track` column and sorted
+  alphabetically. To control order and display names, set `tracks:` in
+  `_config.yml`:
+
+  ```yaml
+  tracks:
+    - key: papers
+      title: Papers
+      description: Optional markdown blurb shown under the heading.
+    - key: music
+      title: Music & Performance
+  ```
+
+### Accessibility page
+
+`accessibility.md` is a skeleton FAQ covering the questions attendees need
+answered before they can decide whether they can attend — interpretation and
+captioning, step-free access, assistance animals, sensory warnings, quiet
+spaces, dietary needs, financial support. Every answer is a placeholder.
+
+Publish it early even where the answer is still "we are working on this". Do not
+delete a question because the answer is unknown or inconvenient: "we cannot
+provide this" is a useful answer and silence is not.
 
 ### Committee page
 
@@ -113,7 +236,7 @@ The string argument (`"sessions"` or `"proceedings"`) must match the `data:` key
 
 ### Feature images and dark mode
 
-`feature_image` renders a single hero image. For a dark-mode-aware hero, set `feature_image_light` and `feature_image_dark` instead — a small script in `_includes/scripts.html` swaps the image based on the user's system preference.
+`feature_image` renders a single hero image. For a dark-mode-aware hero, set `feature_image_light` and `feature_image_dark` instead — the theme script in `_includes/nav.html` swaps any element carrying both `data-light-img` and `data-dark-img` when the theme changes, and `_includes/head.html` resolves the theme before first paint so there is no flash of the wrong mode.
 
 ### SEO
 
@@ -121,18 +244,40 @@ The theme includes [`jekyll-seo-tag`](https://github.com/jekyll/jekyll-seo-tag/)
 
 ### Styling
 
-Styles live in `assets/styles.scss` on top of Bootstrap 5.3.0-alpha2. To override theme styles in a consuming site, create your own `assets/styles.scss` with the same path — Jekyll will prefer the site's copy over the one from the gem. `_sass/` is available for partials if you want to split things up.
+Styles live in `assets/styles.scss` on top of Bootstrap 5.3.0. To override theme styles in a consuming site, create your own `assets/styles.scss` with the same path — Jekyll will prefer the site's copy over the one from the gem. `_sass/` is available for partials if you want to split things up.
 
-## External (CDN) dependencies
+Content tables reflow to stacked cards below 768px, so a wide programme or fee
+table stays readable on a phone without side-scrolling. Colours come from
+Bootstrap custom properties, so both the tables and the programme accordions
+follow the light/dark theme.
 
-`_includes/head.html` loads the following stylesheets and scripts from public CDNs. If you would rather self-host (for privacy, reliability, or offline builds), download the corresponding versions and replace the `<link>` / `<script>` URLs with a `{% link assets/... %}` path.
+## Vendored dependencies
 
-| Dependency | Version | Source |
+Front-end dependencies are **self-hosted** under `assets/imports/` rather than
+loaded from a CDN. A conference site needs to still render years after the event,
+long after any given CDN has reorganised its URLs — and self-hosting also means
+no third-party requests from visitors' browsers, and builds that work offline.
+
+| Dependency | Version | Path |
 | --- | --- | --- |
-| Font Awesome | 6.7.2 | `cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/` |
-| Academicons | 1.9.4 | `cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/` |
-| Bootstrap CSS | 5.3.0-alpha2 | `cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/` |
-| lite-youtube | 1.x | `cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1/` |
+| Bootstrap CSS + JS bundle | 5.3.0 | `assets/imports/bootstrap/` |
+| Font Awesome | 6.7.2 | `assets/imports/fontawesome/` |
+| Academicons | 1.9.4 | `assets/imports/academicons/` |
+| FullCalendar (+ moment-timezone plugin) | 6.1.17 | `assets/imports/fullcalendar/` |
+| Moment / Moment Timezone | 2.29.4 / 0.5.40 | `assets/imports/moment/` |
+| lite-youtube | 1.8.1 | `assets/imports/lite-youtube/` |
+
+To update one, replace the files in place and bump the version in this table. The
+icon-font packages need their font files as well as their CSS — Font Awesome's
+CSS resolves `../webfonts/` and Academicons' resolves `../fonts/`, both relative
+to the stylesheet, so keep the `css/` + `webfonts/` (or `fonts/`) layout intact.
+Dropping in the CSS alone silently breaks every icon.
+
+Only Font Awesome's `.woff2` files are vendored, not the `.ttf` fallbacks beside
+them in the upstream package. Both formats sit in the same `src:` list, so a
+browser takes the woff2 and never requests the ttf — the references to the
+missing files are dead weight, not broken links. Add the `.ttf` files if you need
+to support a browser without woff2 support.
 
 ## Contributing
 

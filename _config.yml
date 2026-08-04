@@ -17,20 +17,44 @@ favicon: /assets/logo.svg
 plugins:
   - jekyll-datapage-generator
   - jekyll-seo-tag
+  - jekyll-redirect-from # lets a moved page keep its old URL via `redirect_from:`
 
+# Top-level nav. Add a `children:` list to any entry to turn it into a
+# dropdown; `url:` on the parent is then optional (omit it for a menu label
+# that isn't itself a page).
 navigation_header:
 - title: Home
   url: /
 - title: Call
   url: /call/
+- title: Program
+  children:
+  - title: Calendar View
+    url: /program/
+  - title: By Session
+    url: /program-by-session/
+  - title: By Track
+    url: /program-by-track/
 - title: Committee
   url: /committee/
-- title: Program
-  url: /program/
-- title: Location
-  url: /location/
+- title: Visit
+  children:
+  - title: Location
+    url: /location/
+  - title: Accessibility FAQ
+    url: /accessibility/
 - title: Contact
   url: /contact/
+
+# Data files holding schedule entries. The first is the main schedule; add more
+# for parallel programmes that run alongside it (installations, exhibits,
+# always-on events). Pages read these via `{% include all-sessions.html %}`.
+# Each one also needs its own `page_gen` block below to get session pages.
+session_sources:
+- data: sessions
+  title: Sessions
+- data: installations
+  title: Installations
 
 # this is the setup for the page_gen plugin which generates individual pages for data files in the _data directory.
 page_gen:
@@ -44,6 +68,17 @@ page_gen:
   page_data_prefix: entry
   debug: false
 - data: sessions
+  template: session_entry
+  dir: sessions
+  index_files: false
+  name: id
+  title: title
+  extension: html
+  page_data_prefix: entry
+  debug: false
+# Additional session sources share the `sessions` output dir and layout, so
+# `datapage_url: "sessions"` resolves links to them the same way.
+- data: installations
   template: session_entry
   dir: sessions
   index_files: false

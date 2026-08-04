@@ -1,0 +1,24 @@
+{% comment %}
+  Collects every schedule entry from every data file listed in
+  `site.session_sources` into one array, sorted by start time, and exposes it as
+  `all_sessions`. Falls back to _data/sessions.yml when no sources are
+  configured.
+
+  Liquid `assign` leaks out of an include, so use it like this:
+
+    {% include all-sessions.html %}
+    {% for session in all_sessions %} ... {% endfor %}
+{% endcomment %}
+
+{% assign all_sessions = "" | split: "" %}
+{% if site.session_sources %}
+  {% for source in site.session_sources %}
+    {% assign source_entries = site.data[source.data] %}
+    {% if source_entries %}
+      {% assign all_sessions = all_sessions | concat: source_entries %}
+    {% endif %}
+  {% endfor %}
+{% elsif site.data.sessions %}
+  {% assign all_sessions = all_sessions | concat: site.data.sessions %}
+{% endif %}
+{% assign all_sessions = all_sessions | sort: "start" %}

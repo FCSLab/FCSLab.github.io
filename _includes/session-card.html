@@ -1,0 +1,49 @@
+{% comment %}
+  One session rendered as a Bootstrap card, for grid listings of the programme.
+
+  Parameters:
+    session - a session entry from any of the `session_sources` data files
+
+  Times are formatted from the ISO `start` / `end` keys rather than the
+  human-readable `date` string, so they stay correct regardless of how a
+  conference chooses to write `date:`.
+
+  Usage:
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% for session in all_sessions %}
+        {% include session-card.html session=session %}
+      {% endfor %}
+    </div>
+{% endcomment %}
+
+{% assign session = include.session %}
+{% capture session_url %}{{ session.id | datapage_url: "sessions" | relative_url }}{% endcapture %}
+
+<div class="col">
+  <div class="card h-100">
+    {% if session.image_url %}
+    <img src="{{ session.image_url | relative_url }}" class="card-img-top" alt="{{ session.title }}">
+    {% endif %}
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="{{ session_url }}" class="text-decoration-none">{{ session.title }}</a>
+      </h5>
+      {% if session.subtitle %}
+      <h6 class="card-subtitle mb-2 text-body-secondary">{{ session.subtitle }}</h6>
+      {% endif %}
+      <p class="card-text">
+        {% if session.start %}
+        <strong>Time:</strong> {{ session.start | date: "%l:%M %p" | strip }}{% if session.end %}–{{ session.end | date: "%l:%M %p" | strip }}{% endif %}<br>
+        {% endif %}
+        {% if session.location %}<strong>Location:</strong> {{ session.location }}<br>{% endif %}
+        {% if session.chair %}<strong>Chair:</strong> {{ session.chair }}{% endif %}
+      </p>
+    </div>
+    <div class="card-footer">
+      <a href="{{ session_url }}" class="btn btn-outline-secondary">Details</a>
+      {% if session.video_url %}
+      <a href="{{ session.video_url }}" class="btn btn-outline-secondary" target="_blank">Video</a>
+      {% endif %}
+    </div>
+  </div>
+</div>

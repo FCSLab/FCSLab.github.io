@@ -4,18 +4,24 @@ title: Program
 permalink: /program/
 ---
 
-{% assign sorted_sessions = site.data.sessions | sort: "start" %}
+{% include all-sessions.html %}
+{% assign sorted_sessions = all_sessions %}
+
+{: .info-box}
+The programme is also available [grouped by day and session]({% link program-by-session.md %}) and [as a flat list by track]({% link program-by-track.md %}).
 
 <script>
   var calendarEvents = (function () {
     var sessions = {{ sorted_sessions | jsonify }};
     var typeColours = {
-      admin:      '#2e312d',
-      keynote:    '#b69255',
-      papers:     '#7e7a72',
-      artworks:   '#565b68',
-      workshops:  '#5f6e62',
-      discussion: '#97a7b6'
+      admin:         '#2e312d',
+      keynote:       '#b69255',
+      papers:        '#7e7a72',
+      artworks:      '#565b68',
+      workshops:     '#5f6e62',
+      discussion:    '#97a7b6',
+      installations: '#97a7b6',
+      break:         '#8f95a5'
     };
     return sessions.map(function (session) {
       var colour = typeColours[session.type];
@@ -37,31 +43,6 @@ permalink: /program/
 
 <div class="row row-cols-1 row-cols-md-2 g-4">
   {% for session in sorted_sessions %}
-    {% capture session_url %}{{ session.id | datapage_url: "sessions" | relative_url }}{% endcapture %}
-    <div class="col">
-      <div class="card h-100">
-        {% if session.image_url %}
-          <img src="{{ session.image_url | relative_url }}" class="card-img-top" alt="{{ session.title }}">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">
-            <a href="{{ session_url }}" class="text-decoration-none text-dark">{{ session.title }}</a>
-          </h5>
-          <h6 class="card-subtitle mb-2 text-muted">{{ session.type | capitalize }} Session</h6>
-          <p class="card-text">
-            <strong>Date:</strong> {{ session.date | date: "%A, %B %d, %Y" }}<br>
-            <strong>Time:</strong> {{ session.date | date: "%I:%M %p" }}<br>
-            <strong>Location:</strong> {{ session.location }}<br>
-            <strong>Chair:</strong> {{ session.chair }}
-          </p>
-        </div>
-        <div class="card-footer">
-          <a href="{{ session_url }}" class="btn btn-outline-secondary">Details</a>
-          {% if session.video_url %}
-            <a href="{{ session.video_url }}" class="btn btn-outline-secondary" target="_blank">Video</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
+    {% include session-card.html session=session %}
   {% endfor %}
 </div>
