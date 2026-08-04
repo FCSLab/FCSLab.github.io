@@ -170,6 +170,18 @@ $black: #000000;
     @return crisp(color.mix($color1, $color2, $weight));
 }
 
+// Bootstrap's background and text utilities (.bg-body, .bg-body-tertiary,
+// .text-body …) read a comma-separated `--bs-*-rgb` companion rather than the
+// colour variable itself, so they need to be set alongside it. Miss one and the
+// utility silently keeps Bootstrap's stock colour — which is how the main
+// container ended up charcoal on a differently-coloured page.
+@function rgb-channels($color) {
+    $c: crisp($color);
+    @return #{color.channel($c, "red", $space: rgb)},
+            #{color.channel($c, "green", $space: rgb)},
+            #{color.channel($c, "blue", $space: rgb)};
+}
+
 // --- Neutral ramp: body text, muted text, borders --------------------------
 // Text and chrome are neutral greys, not palette hues. The four base colours
 // are for things that carry meaning — links, callouts, session types — and a
@@ -186,21 +198,29 @@ $neutral-base: color.scale($c-ink, $saturation: -80%);
 
 // --- Light mode surfaces and text -----------------------------------------
 $light-bg:        $white;
-$light-surface:   mix($c-ink, $white, 4%);
-$light-ink:       neutral(20%);                     // 12.48:1 on white
-$light-muted:     neutral(42%);                     //  5.26:1 on white
-$light-border:    neutral(55%);                     //  3.30:1 on white
-$light-link:      mix($c-primary, $c-ink, 85%);     //  5.39:1 on white
+$light-surface:   neutral(97%);
+$light-ink:       neutral(20%);
+$light-muted:     neutral(42%);
+// Borders are checked against the darkest surface they land on — the callout
+// fill, not the white page — which is what sets this value.
+$light-border:    neutral(52%);
+$light-link:      mix($c-primary, $c-ink, 85%);
 
 // --- Dark mode surfaces and text ------------------------------------------
-// `ink` still tints the page background and the raised surface above it — the
-// background is allowed to carry the brand — but the text on top is neutral.
-$dark-bg:         mix($c-ink, $black, 70%);
-$dark-surface:    $c-ink;
-$dark-ink:        neutral(88%);                     // 11.86:1 on dark-bg
-$dark-muted:      neutral(62%);                     //  5.89:1 on dark-bg
-$dark-border:     neutral(48%);                     //  3.71 / 3.02:1 on bg / surface
-$dark-link:       mix($c-primary, $c-highlight, 52%); // 6.18 / 5.03:1 on bg / surface
+// Surfaces are neutral charcoal, not a tinted `ink`. The page, the main
+// container and the content area all share `$dark-bg` so there is no visible
+// seam where one ends and the next begins; cards and callouts lift off it by a
+// few points of lightness rather than by changing hue.
+// The three surface steps are close together on purpose — 14 / 18 / 20 — so the
+// page reads as one continuous field. Muted text and borders are checked
+// against the lightest of them, `$dark-callout-bg`, since that is the binding
+// case; lifting the surfaces further apart is what breaks those two first.
+$dark-bg:         neutral(14%);
+$dark-surface:    neutral(18%);
+$dark-ink:        neutral(88%);
+$dark-muted:      neutral(62%);
+$dark-border:     neutral(52%);
+$dark-link:       mix($c-primary, $c-highlight, 52%);
 
 // --- Inline code ----------------------------------------------------------
 // Bootstrap's default is #d63384, a pink that belongs to no palette here and
@@ -214,17 +234,21 @@ $dark-code:       mix($c-secondary, $white, 60%);   //  6.18:1 on the dark chip
 // Light mode tints the accent toward white; dark mode mixes it into the page
 // background instead. Mixing toward white in both — which is what this theme
 // used to do — leaves a pale box behind light dark-mode text at 1.11:1.
-$light-callout-bg:  mix($c-ink, $white, 10%);
+// The plain callout is a generic container carrying no meaning, so it stays
+// neutral. Info and warning keep their hue — that is the whole point of them.
+$light-callout-bg:  neutral(93%);
 $light-info-bg:     mix($c-secondary, $white, 10%);
 $light-warning-bg:  mix($c-primary, $white, 10%);
 
-$dark-callout-bg:   mix($c-ink, $dark-bg, 20%);
+$dark-callout-bg:   neutral(20%);
 $dark-info-bg:      mix($c-secondary, $dark-bg, 20%);
 $dark-warning-bg:   mix($c-primary, $dark-bg, 20%);
 
+$light-callout-accent: neutral(30%);
+
 // Accents are lightened in dark mode so the border stays visible on the
 // darker box fill.
-$dark-callout-accent: mix($c-highlight, $dark-surface, 55%);
+$dark-callout-accent: neutral(62%);
 $dark-info-accent:    mix($c-secondary, $c-highlight, 55%);
 $dark-warning-accent: mix($c-primary, $c-highlight, 55%);
 
@@ -248,7 +272,7 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --theme-link:           #{$light-link};
 
     --theme-callout-bg:     #{$light-callout-bg};
-    --theme-callout-accent: #{$c-ink};
+    --theme-callout-accent: #{$light-callout-accent};
     --theme-info-bg:        #{$light-info-bg};
     --theme-info-accent:    #{$c-secondary};
     --theme-warning-bg:     #{$light-warning-bg};
@@ -271,7 +295,15 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --bs-link-color:       #{$light-link};
     --bs-link-hover-color: #{mix($c-primary, $c-ink, 70%)};
     --bs-primary:          #{$c-primary};
-    --bs-primary-rgb:      #{color.channel($c-primary, "red", $space: rgb)}, #{color.channel($c-primary, "green", $space: rgb)}, #{color.channel($c-primary, "blue", $space: rgb)};
+
+    // The `-rgb` companions the utility classes read. `.bg-body` on the main
+    // container needs --bs-body-bg-rgb, not --bs-body-bg.
+    --bs-body-bg-rgb:      #{rgb-channels($light-bg)};
+    --bs-body-color-rgb:   #{rgb-channels($light-ink)};
+    --bs-secondary-bg-rgb: #{rgb-channels($light-surface)};
+    --bs-tertiary-bg-rgb:  #{rgb-channels($light-callout-bg)};
+    --bs-emphasis-color-rgb: #{rgb-channels(neutral(12%))};
+    --bs-primary-rgb:      #{rgb-channels($c-primary)};
 }
 
 // Scoped with `:root` so this always outranks Bootstrap's own
@@ -303,6 +335,12 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --bs-border-color:     #{$dark-border};
     --bs-link-color:       #{$dark-link};
     --bs-link-hover-color: #{mix($c-highlight, $c-primary, 40%)};
+
+    --bs-body-bg-rgb:      #{rgb-channels($dark-bg)};
+    --bs-body-color-rgb:   #{rgb-channels($dark-ink)};
+    --bs-secondary-bg-rgb: #{rgb-channels($dark-surface)};
+    --bs-tertiary-bg-rgb:  #{rgb-channels($dark-callout-bg)};
+    --bs-emphasis-color-rgb: #{rgb-channels(neutral(96%))};
 }
 
 .nav-item {

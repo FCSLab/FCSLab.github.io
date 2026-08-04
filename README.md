@@ -281,6 +281,22 @@ Adjust the ramp through the `neutral()` function rather than by hand; it takes
 an HSL lightness, so `neutral(20%)` and `neutral(88%)` are the light and dark
 body text.
 
+Surfaces come in three steps — page, raised, and callout — and in dark mode they
+sit close together (14% / 18% / 20%) so the page reads as one continuous field
+rather than a stack of panels. The page, the main container and the content area
+all share the page value, so there is no visible seam between them.
+
+Keep those steps close. Muted text and borders are checked against the *lightest*
+surface they can land on, not the page, and spreading the surfaces further apart
+is what breaks those two first.
+
+**When overriding a Bootstrap colour variable, set its `--bs-*-rgb` companion
+too.** The utility classes (`.bg-body`, `.bg-body-tertiary`, `.text-body` …)
+read the comma-separated `-rgb` form, not the colour variable. Setting only
+`--bs-body-bg` leaves `.bg-body` painting Bootstrap's stock charcoal — which for
+a while is exactly what the main container did, on a differently-coloured page.
+Use the `rgb-channels()` helper.
+
 Inline code uses the secondary hue on a faint chip. Bootstrap's default is
 `#d63384`, a pink from no palette here that manages only 4.50:1 on white. The
 dark variant is lightened toward white rather than toward `highlight`, which
