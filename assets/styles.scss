@@ -343,6 +343,10 @@ $gradient-end:   mix($c-secondary, $c-ink, 88%);    // white at 5.76:1
 }
 
 // Legend for the calendar's session-type colours.
+.session-key-list {
+    margin-top: 0.75rem;
+}
+
 .session-key {
     display: inline-flex;
     align-items: center;

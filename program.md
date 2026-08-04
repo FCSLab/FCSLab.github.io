@@ -13,9 +13,10 @@ The programme is also available [grouped by day and session]({% link program-by-
 <script>
   var calendarEvents = (function () {
     var sessions = {{ sorted_sessions | jsonify }};
-    // Colour per session type, from `session_colours:` in _config.yml. Falls
-    // back to the palette's link colour for any type not listed there.
-    var typeColours = {{ site.session_colours | jsonify }};
+    // Colour per session type, from `session_colours:` in _config.yml. The
+    // `|| {}` matters: with no such key Liquid emits `null`, and indexing that
+    // would throw here and leave the calendar with no events at all.
+    var typeColours = {{ site.session_colours | jsonify }} || {};
     var fallback = getComputedStyle(document.documentElement)
       .getPropertyValue('--theme-link').trim() || '#b85e00';
     return sessions.map(function (session) {
@@ -29,19 +30,19 @@ The programme is also available [grouped by day and session]({% link program-by-
   })();
 </script>
 
-<h2>Session Types</h2>
-
-<p>
-{% for pair in site.session_colours %}
-<span class="session-key">
-  <span class="session-key-swatch" style="background: {{ pair[1] }};"></span>{{ pair[0] | capitalize }}
-</span>
-{% endfor %}
-</p>
-
 {% include calendar-timezone-picker.html
    default_timezone="Australia/Sydney"
    default_timezone_label="Sydney (Default)" %}
+
+{% if site.session_colours %}
+<p class="session-key-list">
+  {% for pair in site.session_colours %}
+  <span class="session-key">
+    <span class="session-key-swatch" style="background: {{ pair[1] }};"></span>{{ pair[0] | capitalize }}
+  </span>
+  {% endfor %}
+</p>
+{% endif %}
 
 <h2>Sessions</h2>
 
