@@ -60,6 +60,41 @@ blockquote p {
     border-radius: 5px;
 }
 
+// Inline code sits on a faint chip. `:not(pre) > code` keeps this off code
+// inside a fenced block, where the chip would repeat on every line.
+:not(pre) > code {
+    font-family: $code-font;
+    font-size: 0.875em;
+    color: var(--theme-code);
+    background: var(--theme-callout-bg);
+    padding: 0.15em 0.35em;
+    border-radius: 0.25rem;
+    word-break: break-word;
+}
+
+pre {
+    background: var(--theme-callout-bg);
+    color: var(--theme-ink);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+
+    code {
+        font-family: $code-font;
+        color: inherit;
+        background: none;
+        padding: 0;
+    }
+}
+
+// Links wrapping inline code should tint the code with the link colour, not
+// leave it reading as a separate token.
+.container a, main a {
+    > code, code {
+        color: inherit;
+    }
+}
+
 .center {
     text-align: center;
     display: block;
@@ -135,23 +170,45 @@ $black: #000000;
     @return crisp(color.mix($color1, $color2, $weight));
 }
 
+// --- Neutral ramp: body text, muted text, borders --------------------------
+// Text and chrome are neutral greys, not palette hues. The four base colours
+// are for things that carry meaning — links, callouts, session types — and a
+// page whose body copy is tinted has spent its accent budget on prose.
+//
+// The greys are `ink` with most of its saturation scaled out, rather than true
+// #808080, so they stay faintly cool and sit in the same family as the palette
+// without reading as coloured.
+$neutral-base: color.scale($c-ink, $saturation: -80%);
+
+@function neutral($lightness) {
+    @return crisp(color.change($neutral-base, $lightness: $lightness, $space: hsl));
+}
+
 // --- Light mode surfaces and text -----------------------------------------
 $light-bg:        $white;
 $light-surface:   mix($c-ink, $white, 4%);
-$light-ink:       $c-ink;                                 // 12.67:1 on white
-$light-muted:     mix($c-ink, $white, 68%);         //  4.72:1 on white
-$light-border:    mix($c-ink, $white, 55%);         //  3.29:1 on white
+$light-ink:       neutral(20%);                     // 12.48:1 on white
+$light-muted:     neutral(42%);                     //  5.26:1 on white
+$light-border:    neutral(55%);                     //  3.30:1 on white
 $light-link:      mix($c-primary, $c-ink, 85%);     //  5.39:1 on white
 
 // --- Dark mode surfaces and text ------------------------------------------
-// `ink` becomes the page background here; the pure base colour is the raised
-// surface, so cards and callouts sit visibly above the page.
+// `ink` still tints the page background and the raised surface above it — the
+// background is allowed to carry the brand — but the text on top is neutral.
 $dark-bg:         mix($c-ink, $black, 70%);
 $dark-surface:    $c-ink;
-$dark-ink:        mix($c-highlight, $white, 80%);   // 11.91:1 on dark-bg
-$dark-muted:      mix($c-highlight, $dark-bg, 62%); //  5.11:1 on dark-bg
-$dark-border:     mix($c-ink, $c-highlight, 58%);   //  3.49:1 on dark-bg
+$dark-ink:        neutral(88%);                     // 11.86:1 on dark-bg
+$dark-muted:      neutral(62%);                     //  5.89:1 on dark-bg
+$dark-border:     neutral(48%);                     //  3.71 / 3.02:1 on bg / surface
 $dark-link:       mix($c-primary, $c-highlight, 52%); // 6.18 / 5.03:1 on bg / surface
+
+// --- Inline code ----------------------------------------------------------
+// Bootstrap's default is #d63384, a pink that belongs to no palette here and
+// only manages 4.50:1 on white. Inline code gets the secondary hue on a faint
+// chip instead. The dark variant is lightened toward white rather than toward
+// `highlight`, which would pull it khaki.
+$light-code:      mix($c-secondary, $c-ink, 88%);   //  4.80:1 on the light chip
+$dark-code:       mix($c-secondary, $white, 60%);   //  6.18:1 on the dark chip
 
 // --- Callout box accents --------------------------------------------------
 // Light mode tints the accent toward white; dark mode mixes it into the page
@@ -198,13 +255,15 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --theme-warning-accent: #{$c-primary};
 
     --theme-gradient: linear-gradient(90deg, #{$gradient-start}, #{$gradient-end});
+    --theme-code:           #{$light-code};
 
     // Hand the palette to Bootstrap so its own components stop using the
     // stock blues and greys.
     --bs-body-bg:          #{$light-bg};
     --bs-body-color:       #{$light-ink};
-    --bs-emphasis-color:   #{$c-ink};
-    --bs-heading-color:    #{$c-ink};
+    --bs-emphasis-color:   #{neutral(12%)};
+    --bs-heading-color:    #{$light-ink};
+    --bs-code-color:       #{$light-code};
     --bs-secondary-color:  #{$light-muted};
     --bs-secondary-bg:     #{$light-surface};
     --bs-tertiary-bg:      #{$light-callout-bg};
@@ -231,11 +290,13 @@ $gradient-end:   mix($c-primary, $c-ink, 92%);      // white at 4.96:1
     --theme-info-accent:    #{$dark-info-accent};
     --theme-warning-bg:     #{$dark-warning-bg};
     --theme-warning-accent: #{$dark-warning-accent};
+    --theme-code:           #{$dark-code};
 
     --bs-body-bg:          #{$dark-bg};
     --bs-body-color:       #{$dark-ink};
-    --bs-emphasis-color:   #{$white};
+    --bs-emphasis-color:   #{neutral(96%)};
     --bs-heading-color:    #{$dark-ink};
+    --bs-code-color:       #{$dark-code};
     --bs-secondary-color:  #{$dark-muted};
     --bs-secondary-bg:     #{$dark-surface};
     --bs-tertiary-bg:      #{$dark-callout-bg};

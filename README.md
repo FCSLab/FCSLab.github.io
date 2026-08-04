@@ -264,6 +264,28 @@ sets as CSS custom properties (`--theme-bg`, `--theme-ink`, `--theme-link`,
 overriding `--bs-*`. Component rules only ever reference the custom properties,
 never a literal colour, so nothing can strand a hardcoded value in one mode.
 
+#### Neutral text, coloured accents
+
+Body copy, headings, muted text and borders are **neutral greys**, not palette
+hues. The four base colours are reserved for things that carry meaning — links,
+callout boxes, session types, inline code. A page whose body text is tinted has
+spent its accent budget on prose, and nothing is left to mark what matters.
+
+The greys are not true `#808080`: they are `ink` with 80% of its saturation
+scaled out, so they stay faintly cool and sit in the same family as the palette
+without reading as coloured. In dark mode the page background and raised
+surfaces still carry the `ink` tint — the background is allowed to be
+brand-coloured — but the text on top of them is neutral.
+
+Adjust the ramp through the `neutral()` function rather than by hand; it takes
+an HSL lightness, so `neutral(20%)` and `neutral(88%)` are the light and dark
+body text.
+
+Inline code uses the secondary hue on a faint chip. Bootstrap's default is
+`#d63384`, a pink from no palette here that manages only 4.50:1 on white. The
+dark variant is lightened toward white rather than toward `highlight`, which
+would pull it khaki.
+
 The dark values are **not** the light values lightened. Light mode mixes each
 accent toward white; dark mode mixes it into the page background instead. Doing
 the former in both — which this theme used to do — leaves callout boxes with a
