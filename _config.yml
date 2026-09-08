@@ -5,7 +5,7 @@ tagline: Research lab exploring freshwater ecology and climate adaptation. # a s
 description: The FCS Lab explores freshwater ecology and climate adaptation 
   and mitigation through an interdisciplinary lens.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://FCSLab.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://fcslab.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: 
 github_username:  FCSLab
 footer_copyright: Kimberly Yazzie
