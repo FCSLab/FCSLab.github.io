@@ -57,10 +57,6 @@ navigation_header:
   url: /
 - title: Team
   url: /team/
-- title: Publications
-  url: /publications/
-- title: News
-  url: /news/
 - title: Contact
   url: /contact/
 
