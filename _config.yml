@@ -1,18 +1,16 @@
 # This is a demo config file showing a minimal set of default keys and keys used by the theme.
-title: Your awesome title
-email: your-email@example.com
-tagline: Write a short description of the site here. # a short description
-description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+title: Freshwater and Climate Solutions Lab
+email: Kimberly.Yazzie@ubc.ca
+tagline: Research lab exploring freshwater ecology and climate adaptation. # a short description
+description: The FCS Lab explores freshwater ecology and climate adaptation 
+  and mitigation through an interdisciplinary lens.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
-footer_copyright: Name of Copyright Holder
-logo: /assets/logo.svg
-favicon: /assets/logo.svg
+url: "https://FCSLab.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+twitter_username: 
+github_username:  FCSLab
+footer_copyright: Kimberly Yazzie
+logo: #/assets/logo.svg
+favicon: #/assets/logo.svg
 
 plugins:
   - jekyll-datapage-generator
@@ -57,24 +55,12 @@ session_colours:
 navigation_header:
 - title: Home
   url: /
-- title: Call
-  url: /call/
-- title: Program
-  children:
-  - title: Calendar View
-    url: /program/
-  - title: By Session
-    url: /program-by-session/
-  - title: By Track
-    url: /program-by-track/
-- title: Committee
-  url: /committee/
-- title: Visit
-  children:
-  - title: Location
-    url: /location/
-  - title: Accessibility FAQ
-    url: /accessibility/
+- title: Team
+  url: /team/
+- title: Publications
+  url: /publications/
+- title: News
+  url: /news/
 - title: Contact
   url: /contact/
 
