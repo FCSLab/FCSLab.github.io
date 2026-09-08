@@ -1,7 +1,12 @@
 ---
-title: News
 layout: page
-feature_image: assets/Elk_River_OR_IMG_0676.JPG
+title: News
+permalink: /news/
+feature_image: assets/WA_State_Cathedral_Flowers_Meadow_IMG_1338.jpeg
 ---
-## Stay tuned....
 
+### Kimberly Yazzie
+<br>
+Kim (she/her)
+<br>
+Principal Investigator
