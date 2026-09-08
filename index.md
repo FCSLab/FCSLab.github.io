@@ -1,65 +1,34 @@
 ---
-title: Academic Org Theme
+title: Freshwater and Climate Solutions Lab
 layout: page
-feature_image: assets/charles-martin-ventilation.jpg
+feature_image: assets/WA_State_Spirit_Lake_IMG_9693.jpeg
 ---
+## What we do
 
-**Academic Org Theme** is a Jekyll theme for academic conferences, research groups, and small organisations. It aims for clear and consistent pages over visual flourish — the design assumption is that visitors come here to find a specific paper, a session time, or a committee contact, not to scroll through marketing copy.
+**The FCS Lab** explores freshwater ecology and climate adaptation and mitigation through an interdisciplinary lens. We draw on diverse knowledge systems and engage across sectors, combining quantitative and qualitative methods to understand the fundamental ecosystem processes that shape people-nature relationships in aquatic systems and the built environment. Our research informs decision-making on sustainable solutions for water, energy, and food security.
+<br><br>
+## Freshwater Ecology
 
-The site you're reading right now is a working demo of the theme, built from the same repo that publishes the gem. The **Program**, **Committee**, and per-paper pages under `/proceedings/` are generated from two data files (`_data/sessions.yml` and `_data/proceedings.csv`); no per-paper HTML is written by hand. See the [README on GitHub](https://github.com/smcclab/academic-org-theme) for the consuming-site usage guide.
+Using fieldwork, geospatial tools, and ecological models, we quantify how global environmental change is reshaping fish communities and fish-habitat relationships.
+<br><br>
+## Climate Adaptation and Mitigation
 
-## What the theme gives you
+Through community engagement, we co-develop decision-support tools that inform climate adaptation planning and pathways to energy transformation.
+<br><br>
+## Indigenous Land and Water Governance
 
-- A Bootstrap-based responsive layout with a configurable top navigation, optional feature images, and dark-mode-aware heroes.
-- A data-driven pipeline that turns a CSV of papers and a YAML of sessions into cross-linked per-paper and per-session pages.
-- A FullCalendar-backed program page that renders straight from your sessions data.
-- A committee page that renders from a flat YAML list.
-- SEO metadata via `jekyll-seo-tag`, and standard Markdown/Kramdown rendering for prose content.
+Our research supports decision-making in Indigenous land and water governance, guided by responsible dialogue and relationships grounded in relationality and reciprocity.    
 
-## Where this came from
+<br><br>
+<span style="font-size:80%;">UBC Forestry & Environmental Stewardship is located at UBC’s Point Grey campus on the traditional, ancestral, and unceded xʷməθkʷəy̓əm (Musqueam) Territory. We acknowledge the culture, history, and traditions of the Musqueam and other Indigenous Peoples who have stewarded this land and its forests for millennia. We are grateful to learn, research, and work inside the beautiful Forest Sciences Centre in Vancouver, in our research forests in Maple Ridge and Williams Lake, on Haida Gwaii, and in numerous locations around the world.</span>
 
-The theme started as a small layout for [Charles Martin's homepage](https://charlesmartin.au) and was then extended to handle the needs of the [NIME community](https://nime.org) — proceedings listings, sessions, and committee pages that multiple conference years could share. It's now packaged as a gem so other organisations can adopt the same structure without forking.
+<br><br>
+<img src="{{ '/assets/Vancouver_Queen_Ellizabeth_Park_IMG_7124.jpeg' | relative_url }}" alt="Vancouver from Queen Elizabeth Park" class="my-custom-style" width="1000">
 
----
+<br> <br>
+<span style="display: block; text-align: center;font-size:90%;">The University of British Columbia | Faculty of Forestry & Environmental Stewardship
+  <br>Department of Forest & Conservation Sciences | Vancouver BC | V6T 1Z4 Canada |       <br>Unceded xʷməθkʷəy̓əm Territory  
+      <br>Kimberly.Yazzie@ubc.ca
+      <br>forestry.ubc.ca<span>
 
-The sections below exist to demo the theme's Markdown rendering. They're useful if you're evaluating the typography before adopting the theme.
 
-## Typography
-
-This is a paragraph with **bold text**, *italicized text*, and `inline code`. You can also use ~~strikethrough~~ text.
-
-### Unordered list
-
-- Item 1
-- Item 2
-  - Subitem 2.1
-  - Subitem 2.2
-- Item 3
-
-### Ordered list
-
-1. First item
-2. Second item
-3. Third item
-   1. Subitem 3.1
-   2. Subitem 3.2
-
-## Links
-
-[This is a link to Google](https://www.google.com)
-
-## Blockquotes
-
-> This is a blockquote. It can span multiple lines and can contain other markdown elements.
->
-> - Like this list item
-> - And another one
-
-## Code blocks
-
-```python
-def hello_world():
-    print("Hello, world!")
-
-hello_world()
-```
