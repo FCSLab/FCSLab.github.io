@@ -652,3 +652,30 @@ article table {
         }
     }
 }
+
+.image-row {
+  display: flex;
+  align-items: center; /* Aligns images vertically in the middle */
+  gap: 20px;          /* Space between the two images */
+}
+
+.image-row .img-left {
+  flex: 1;            /* Takes up proportional space */
+  max-width: 64%;     /* Adjust size as needed */
+}
+
+.image-row .img-right {
+  flex: 2;            /* Takes up more space than the left image */
+  max-width: 36%;     /* Adjust size as needed */
+}
+
+/* Makes sure images scale nicely on mobile screens */
+@media (max-width: 600px) {
+  .image-row {
+    flex-direction: column;
+  }
+  .image-row .img-left,
+  .image-row .img-right {
+    max-width: 100%;
+  }
+}
